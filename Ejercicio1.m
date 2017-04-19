@@ -1,12 +1,14 @@
 function Ejercicio1()
-    Kittler('cuadro1_005.bmp');
-    Kittler('trackedCell15.tif');
+    %Kittler('test1.jpg');
+    %Kittler('test2.tif');
+    %Kittler('test3.bmp');
+    %Kittler('test4.tif');
+    Kittler('test5.bmp');
 end
 
 function Kittler(pathImagen)
     imagen = imread(pathImagen);
     imagen = rgb2gray(imagen);
-    tamano = size(imagen);
     hist = histograma(imagen);
     figure;
     plot(hist);
@@ -17,15 +19,13 @@ function Kittler(pathImagen)
     figure;
     bar(arrVerosi);
     minimo = min(arrVerosi);
-    %disp(minimo);
+    disp(minimo);
     minimos = find(ismember(arrVerosi,minimo));
     result = minimos(1);
-    p1 = pMarginal(hist,result,1);
-    p2 = pMarginal(hist,result,2);
-    desv1 = varianzaNormalizada(hist,result,1);
-    desv2 = varianzaNormalizada(hist,result,2);
-    med1 = mediaNormalizada(hist,result,1);
-    med2 = mediaNormalizada(hist,result,2);
+    desv1 = varianza(hist,result,1);
+    desv2 = varianza(hist,result,2);
+    med1 = media(hist,result,1);
+    med2 = media(hist,result,2);
     umbralizada = umbralizacion(imagen,result);
     figure;
     imshow(umbralizada);
@@ -54,7 +54,7 @@ function result = verosimilitud(hist,T)
     p2 = pMarginal(hist,T,2);
     desv1 = sqrt(varianza(hist,T,1));
     desv2 = sqrt(varianza(hist,T,2));
-    result = 1+2*(p1*log(desv1)+p2*log(desv2)) -2*(p1*log(p1)+p2*log(p2));
+    result = 1+2*(p1*log(desv1+eps)+p2*log(desv2+eps)) -2*(p1*log(p1)+p2*log(p2));
 end
 
 function result = pMarginal(hist,T,i)
@@ -75,34 +75,10 @@ function result = varianza(hist,T,i)
         b = 256;
     end
     seccion = hist(a:b).*(((a-1:b-1)-media(hist,T,i)).^2);
-    result = sum(seccion);
-end
-
-function result = varianzaNormalizada(hist,T,i)
-    if(i == 1)
-        a = 1;
-        b = T+1;
-    else
-        a = T;
-        b = 256;
-    end
-    seccion = hist(a:b).*(((a-1:b-1)-media(hist,T,i)/pMarginal(hist,T,i)).^2);
     result = sum(seccion)/pMarginal(hist,T,i);
 end
 
 function result = media(hist,T,i)
-    if(i == 1)
-        a = 1;
-        b = T+1;
-    else
-        a = T;
-        b = 256;
-    end
-    seccion = hist(a:b).*(a-1:b-1);
-    result = sum(seccion);
-end
-
-function result = mediaNormalizada(hist,T,i)
     if(i == 1)
         a = 1;
         b = T+1;
